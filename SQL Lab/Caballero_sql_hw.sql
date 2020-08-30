@@ -55,3 +55,113 @@ ALTER TABLE "InvoiceLine"
    DROP CONSTRAINT "FK_InvoiceLineInvoiceId", ADD  CONSTRAINT "FK_InvoiceLineInvoiceId"
    FOREIGN KEY ("InvoiceId") REFERENCES "Invoice" ("InvoiceId") ON DELETE CASCADE;
 delete from "Customer" where "FirstName"='Robert' and "LastName"='Walter';
+
+-- 3 SQL Functions
+
+-- 3.1 
+	-- Part 1 Create a query that returns the current time.
+select localtime;
+	-- Part 2 Create a query that returns the length of name in MEDIATYPE table
+		-- I interpreted this as how many names in the Name column for MediaType Table
+select length("Name") from "MediaType";
+-- 3.2
+	-- Part 1 Create a function that returns the average total of all invoices
+create or replace function Invoiceaverage()
+returns numeric as $$
+declare sumInvoice numeric ;
+declare counter numeric ;
+declare average numeric;
+begin
+	select count("Total") into counter from "Invoice";
+	select sum("Total") into sumInvoice from "Invoice";
+	select div(suminvoice,counter) into average;
+	return average;
+end;
+$$ language plpgsql;
+
+select Invoiceaverage();
+		-- I created my own function, but here is using the avg() function,
+		-- I originally thought we had to make our own functions (User defined) but I realized it was too late
+		-- After I had finished creating the function
+select avg("Total") from "Invoice";
+	-- Part 2 Create a function that returns the most expensive track
+drop function expensiveTrack;
+create or replace function expensiveTrack()
+returns varchar
+as $$
+declare maxp numeric;
+declare maxT varchar;
+begin
+	select max("UnitPrice") into maxp from "Track";
+	select "Name" into maxT from "Track" where "UnitPrice"=maxp;
+	return maxT;
+end
+$$ language plpgsql;
+
+select expensiveTrack();
+select max("UnitPrice") from "Track"; -- Found out that the max Unit Price is 1.99 so input it down
+select "Name","UnitPrice" from "Track" where "UnitPrice" = '1.99';
+
+-- 3.3 User Defined Functions
+	-- Part 1 Create a function that returns the average price of invoiceline items in the invoiceline table.
+create or replace function avgPrice()
+returns numeric 
+as $$
+declare averageP numeric;
+begin 
+	select avg("UnitPrice") into averageP from "InvoiceLine";
+	return averageP;
+end
+$$ language plpgsql;
+select avgPrice();
+	-- Part 2 Create a function that returns all employees who are born after 1968.
+select * from "Employee" where "BirthDate" > '12-31-1968';
+
+-- 4 Triggers
+
+-- 4.1 Insert after Trigger 
+	-- Create an after insert trigger on the employee table fired after a new record is inserted into the table to set the phone number to 867-5309.
+create or replace function em_insert()
+returns trigger as $$
+begin
+	if(TG_OP = 'INSERT') then
+	new."Phone" = '867-5309';
+	end if; 
+	return new;
+end;
+$$ language plpgsql;
+
+create trigger employee_insert
+after insert on "Employee"
+for each row
+execute function em_insert();
+
+insert into "Employee"("EmployeeId", "LastName", "FirstName", "Phone") values(11,'Billy','Bob','000-0000');
+insert into "Employee"("EmployeeId", "LastName", "FirstName") values(12,'Bill','Bobby');
+
+-- 4.2 
+	-- Create a before trigger on the customer table that fires before a row is inserted from the table to set the company to Revature.
+create or replace function cus_insert()
+returns trigger as $$
+begin
+	if(TG_OP = 'INSERT') then
+	new."Company" = 'Revature';
+	end if; 
+	return new;
+end;
+$$ language plpgsql;
+
+create trigger employee_insert
+before insert on "Customer"
+for each row
+execute function cus_insert();
+
+insert into "Customer"("CustomerId", "FirstName", "LastName", "Company", "Email" ) values(89, 'Aldo', 'C', 'Compnay', 'a@a');
+
+-- 5 Joins
+
+-- 5.1 Inners 
+	-- Create an inner join that joins customers and orders and specifies the name of the customer and the invoiceId
+select "FirstName", "LastName", "InvoiceId" from "Customer" inner join "Invoice" on "Customer"."CustomerId" = "Invoice"."InvoiceId"; 
+
+
