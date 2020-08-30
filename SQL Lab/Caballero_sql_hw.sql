@@ -165,3 +165,29 @@ insert into "Customer"("CustomerId", "FirstName", "LastName", "Company", "Email"
 select "FirstName", "LastName", "InvoiceId" from "Customer" inner join "Invoice" on "Customer"."CustomerId" = "Invoice"."InvoiceId"; 
 
 
+-- 5.2 Full Outer
+	--  Create an outer join that joins the customer and invoice table, specifying the CustomerId, firstname, lastname, invoiceId, and total
+select "Customer"."CustomerId", "FirstName", "LastName", "InvoiceId", "Total" from "Customer" full join "Invoice" on "Customer"."CustomerId" = "Invoice"."InvoiceId";
+
+-- 5.3 Right Join
+	-- Create a right join that joins album and artist specifying artist name and title
+select "Artist"."Name", "Title" from "Album" right join "Artist" on "Album"."ArtistId" = "Artist"."ArtistId"; 
+
+-- 5.4 Cross Join
+	-- Create a cross join that joins album and artist and sorts by artist name in ascending order.
+select "Artist"."Name","Album"."Title" from "Artist" cross join "Album" order by "Name" asc; 
+
+-- 5.5 Self Join
+	-- Perform a self-join on the employee table, joining on the reportsto column.
+select "Employee"."EmployeeId", "Employee"."FirstName"||' '||"Employee"."LastName" as "Supervisor", A."FirstName"||' '||A."LastName" as "Works", A."ReportsTo" from "Employee" inner join "Employee" A on "Employee"."EmployeeId"=A."ReportsTo"; 
+
+-- 6 Set Operations
+	-- 6.1 Union
+		-- Create a UNION query for finding the unique records of last name, first name, and phone number for all customers and employees.
+select "LastName", "FirstName", "Phone" from "Employee" 
+union 
+select "LastName","FirstName","Phone" from "Customer";
+	-- 6.2 Except All
+		-- Create an EXCEPT ALL query for finding the all records of the city, state, and postal codes for all customers and all records of employees that have a different  city, state, and postal codes of any customer.
+select "City","State","PostalCode" from "Customer"
+except all select "City", "State", "PostalCode" from "Employee";
